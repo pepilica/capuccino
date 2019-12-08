@@ -70,11 +70,18 @@ class AddEdit(QWidget):
         return QMessageBox.critical(self, 'Ошибка', 'Не все поля заполнены. Повторите попытку.',
                                     buttons=QMessageBox.Ok)
 
+    def ok(self):
+    return QMessageBox.information(self, 'Успех', f'Действие выполнено удачно',
+                                   buttons=QMessageBox.Ok)
+    
     def edit(self):
         row = []
         for j in range(6):
-            item = self.tableWidgetEdit.item(0, j).text()
-            row.append(item)
+            item = self.tableWidgetEdit.item(0, j)
+            if item:
+                row.append(item.text())
+            else:
+                row.append(None)
         if self.is_completed(row):
             row = list(map(lambda a: "'" + a + "'", row))
             for i in range(len(row)):
@@ -84,22 +91,26 @@ class AddEdit(QWidget):
             self.comboBox.addItem(row[0][1:-1])
             self.comboBox.removeItem(self.comboBox.findText(self.name))
             self.comboBox.setCurrentIndex(len(self.comboBox) - 1)
+            self.ok()
         else:
             self.warn()
 
     def create_n(self):
         row = []
         for j in range(6):
-            item = self.tableWidgetEdit.item(0, j).text()
-            row.append(item)
+            item = self.tableWidgetCreate.item(0, j)
+            if item:
+                row.append(item.text())
+            else:
+                row.append(None)
         if self.is_completed(row):
             row = list(map(lambda a: "'" + a + "'", row))
-            self.cur.execute(f'insert into Coffee({self.nodes}) values({", ".join(row)})')
+            self.cur.execute(f'insert into Coffee({", ".join(self.nodes)}) values({", ".join(row)})')
             self.comboBox.addItem(row[0][1:-1])
             self.con.commit()
+            self.ok()
         else:
             self.warn()
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
